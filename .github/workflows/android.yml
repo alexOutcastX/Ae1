@@ -3,13 +3,13 @@ name: Build Android APK
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:      # lets you run it manually from the Actions tab
-  release:
-    types: [ created ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +24,7 @@ jobs:
           npm ci
           npm run build
 
-      - name: Capacitor sync (copies web assets into the Android project)
+      - name: Capacitor sync
         working-directory: frontend
         run: npx cap sync android
 
@@ -41,18 +41,33 @@ jobs:
         working-directory: frontend/android
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          set -o pipefail
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/build.log
 
       - name: Upload APK artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
-      # When you publish a GitHub Release, also attach the APK to it.
-      - name: Attach APK to release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+      # Publish the result (APK on success, log on failure) to a dedicated
+      # branch so it can be retrieved over plain git.
+      - name: Publish result to apk-build branch
+        if: always()
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          rm -rf /tmp/pub && mkdir -p /tmp/pub
+          echo "${{ job.status }}" > /tmp/pub/STATUS.txt
+          APK=frontend/android/app/build/outputs/apk/debug/app-debug.apk
+          [ -f "$APK" ] && cp "$APK" /tmp/pub/app-debug.apk || true
+          cp /tmp/build.log /tmp/pub/build.log 2>/dev/null || true
+          git checkout --orphan apk-build
+          find . -maxdepth 1 -mindepth 1 ! -name '.git' -exec rm -rf {} +
+          cp -r /tmp/pub/. .
+          git add -A
+          git commit -m "build ${{ job.status }} @ ${GITHUB_SHA::7}"
+          git push -f origin apk-build
