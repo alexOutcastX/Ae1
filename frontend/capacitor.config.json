@@ -1,6 +1,6 @@
 {
   "appId": "com.proapp.app",
-  "appName": "ProApp",
+  "appName": "Love Letters",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

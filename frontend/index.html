@@ -1,14 +1,840 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>ProApp</title>
-    <!-- Razorpay Checkout (web/Capacitor webview) -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>💕 Love Letters</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:wght@500;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Playfair Display',serif;
+  background:linear-gradient(135deg,#ff9a9e 0%,#fad0c4 100%);
+  color:#4a2c4f;
+  min-height:100vh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:12px;
+}
+.widget{
+  background:rgba(255,255,255,0.97);
+  border-radius:22px;
+  padding:16px 14px;
+  width:100%;
+  max-width:400px;
+  box-shadow:0 15px 35px -10px rgba(0,0,0,0.25);
+  border:3px solid #ff69b4;
+  position:relative;
+}
+.header{text-align:center;margin-bottom:10px}
+.header h1{font-size:24px;color:#c026d3;margin:4px 0}
+.header p{font-size:13px;color:#db2777;font-family:'Dancing Script',cursive}
+
+.top-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#fce7f3;
+  padding:8px 12px;
+  border-radius:12px;
+  margin-bottom:12px;
+  font-size:13px;
+  font-weight:600;
+}
+.top-bar button{
+  background:#ec4899;
+  color:white;
+  border:none;
+  padding:5px 10px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.tabs{
+  display:flex;
+  background:#fce7f3;
+  border-radius:9999px;
+  padding:3px;
+  margin-bottom:14px;
+}
+.tab{
+  flex:1;
+  padding:9px;
+  text-align:center;
+  border-radius:9999px;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+}
+.tab.active{
+  background:linear-gradient(45deg,#ec4899,#db2777);
+  color:white;
+  box-shadow:0 4px 12px rgba(236,72,153,0.4);
+}
+
+.section{display:none}
+.section.active{display:block}
+
+label{font-size:13.5px;font-weight:600;color:#9f1239;margin-bottom:5px;display:block}
+textarea,.number-input,input[type="email"],input[type="password"],input[type="text"]{
+  width:100%;
+  padding:11px;
+  background:#fff0f5;
+  border:2.5px solid #f472b6;
+  border-radius:14px;
+  font-size:15px;
+  font-family:'Playfair Display',serif;
+  resize:vertical;
+}
+.number-input{font-family:monospace;min-height:46px}
+
+.controls{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+button{
+  padding:12px;
+  border:none;
+  border-radius:9999px;
+  font-weight:700;
+  font-size:15px;
+  cursor:pointer;
+}
+button:active{transform:scale(0.97)}
+.btn-pink{background:linear-gradient(45deg,#ec4899,#db2777);color:white}
+.btn-light{background:#fce7f3;color:#9f1239}
+
+.result-box{
+  background:#fff0f5;
+  border:2.5px solid #f472b6;
+  border-radius:14px;
+  padding:12px;
+  min-height:55px;
+  font-size:16px;
+  line-height:1.4;
+  margin-top:6px;
+}
+.first-letter{color:#c026d3;font-weight:700;font-size:1.1em}
+
+.decoding-card{
+  background:white;
+  border:2px solid #f472b6;
+  border-radius:12px;
+  padding:10px 12px;
+  margin-bottom:7px;
+  cursor:pointer;
+}
+.decoding-card:hover{border-color:#ec4899;background:#fff0f5}
+.decoding-card .word{font-size:18px;font-weight:700;color:#c026d3}
+.decoding-card .detail{font-size:12px;color:#831843;font-family:monospace;margin-top:3px}
+
+.vibe-box{
+  font-size:13px;
+  background:#fdf4ff;
+  padding:10px;
+  border-radius:12px;
+  border:1.5px dashed #f472b6;
+  margin:10px 0;
+}
+.section-title{font-size:13px;color:#9f1239;margin:12px 0 5px;font-weight:600}
+.word-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.word-chip{
+  background:#fdf4ff;
+  border:1.5px solid #f472b6;
+  padding:4px 9px;
+  border-radius:9999px;
+  font-size:12px;
+  color:#831843;
+  cursor:pointer;
+}
+.toggle-row{display:flex;gap:6px;margin:8px 0}
+.seg-btn{
+  flex:1;
+  padding:7px;
+  border-radius:9999px;
+  font-size:13px;
+  font-weight:700;
+  border:2px solid #f472b6;
+  background:white;
+  color:#9f1239;
+}
+.seg-btn.active{background:#ec4899;color:white;border-color:#ec4899}
+
+/* Login Screen */
+.login-overlay{
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(255,240,245,0.97);
+  border-radius:22px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:30px 25px;
+  z-index:100;
+}
+.login-overlay h2{
+  color:#c026d3;
+  font-size:26px;
+  margin-bottom:6px;
+}
+.login-overlay p{
+  color:#db2777;
+  font-size:14px;
+  margin-bottom:20px;
+  text-align:center;
+}
+.login-overlay input{
+  margin-bottom:12px;
+}
+.login-overlay .btn-pink{
+  width:100%;
+  margin-top:8px;
+}
+.login-note{
+  font-size:12px;
+  color:#9f1239;
+  margin-top:15px;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+<div class="widget" id="main-widget">
+  <div class="header">
+    <div style="font-size:26px">💕</div>
+    <h1>Love Letters</h1>
+    <p>Smart Split • Sum Matching • Vibe Engine</p>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div>💎 <span id="credits">5</span> credits</div>
+    <div>🔥 <span id="streak">1</span> day</div>
+    <button onclick="showBuyOptions()">Buy Credits</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">💌 Encode</div>
+    <div class="tab" onclick="switchTab(1)">🔍 Decipher</div>
+  </div>
+
+  <!-- ==================== ENCODE ==================== -->
+  <div id="encode-tab" class="section active">
+    <label>Write your sweet words...</label>
+    <textarea id="encode-input" placeholder="you are my forever love" rows="3"></textarea>
+
+    <div style="margin:10px 0;display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="highlight-first" checked style="width:16px;height:16px;accent-color:#ec4899">
+      <label style="margin:0;font-size:13px">Highlight first letter</label>
+    </div>
+
+    <div class="controls">
+      <button onclick="encodeWords()" class="btn-pink">💕 Convert to Numbers</button>
+      <button onclick="shareResult('encode')" class="btn-light">📤 Share</button>
+    </div>
+
+    <label>Result</label>
+    <div id="encode-result" class="result-box">Your romantic numbers will appear here...</div>
+  </div>
+
+  <!-- ==================== DECIPHER ==================== -->
+  <div id="decipher-tab" class="section">
+    <div id="decipher-content">
+      <label>Enter code</label>
+      <input type="text" id="decipher-input" class="number-input" placeholder="54  or  138  or  12 5 25" value="54">
+
+      <div class="controls">
+        <button onclick="decipherNumbers()" class="btn-pink">🔍 Decode (-5 credits)</button>
+      </div>
+
+      <div class="section-title">Possible Decodings</div>
+      <div id="decipher-results"></div>
+
+      <div id="vibe-interpret" class="vibe-box" style="display:none"></div>
+
+      <div class="section-title">Letter Anagrams</div>
+      <div id="anagram-list" class="word-list"></div>
+
+      <div class="section-title">Number Swap Variations (±1)</div>
+      <div id="swap-variations" class="word-list"></div>
+
+      <div class="section-title">Words matching this total</div>
+      <div class="toggle-row">
+        <button onclick="setVibe('positive')" id="vibe-positive" class="seg-btn active">💖 Positive</button>
+        <button onclick="setVibe('dark')" id="vibe-dark" class="seg-btn">🌑 Dark</button>
+      </div>
+      <div id="variations-list" class="word-list"></div>
+
+      <div id="pure-total-section" style="display:none;margin-top:14px">
+        <div class="section-title">Words whose total equals the number you typed</div>
+        <div id="pure-total-list" class="word-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FAKE LOGIN OVERLAY ==================== -->
+  <div id="login-overlay" class="login-overlay" style="display:none">
+    <div style="font-size:40px;margin-bottom:8px">💕</div>
+    <h2>Welcome Back</h2>
+    <p>Login to unlock the Decode feature forever</p>
+
+    <input type="text" id="login-username" placeholder="Username" value="A" autocapitalize="none" autocorrect="off">
+    <input type="password" id="login-password" placeholder="Password" value="1">
+
+    <button onclick="doLogin()" class="btn-pink">Login & Unlock Decode</button>
+
+    <div class="login-note">
+      Demo login.<br>
+      Username: <strong>A</strong> &nbsp;•&nbsp; Password: <strong>1</strong>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== STATE =====================
+let isUnlocked = localStorage.getItem('loveUnlocked') === 'true';
+let credits = parseInt(localStorage.getItem('loveCredits'));
+if (isNaN(credits)) credits = 5;
+
+let lastLogin = localStorage.getItem('loveLastLogin') || '';
+let streak = parseInt(localStorage.getItem('loveStreak')) || 1;
+
+const today = new Date().toISOString().slice(0,10);
+
+// Daily reward
+if (lastLogin !== today) {
+  credits += 5;
+  if (lastLogin && lastLogin < today) streak += 1;
+  else streak = 1;
+  localStorage.setItem('loveLastLogin', today);
+  localStorage.setItem('loveStreak', streak);
+  localStorage.setItem('loveCredits', credits);
+}
+
+function updateUI() {
+  document.getElementById('credits').textContent = credits;
+  document.getElementById('streak').textContent = streak;
+
+  const overlay = document.getElementById('login-overlay');
+  if (!isUnlocked) {
+    overlay.style.display = 'flex';
+  } else {
+    overlay.style.display = 'none';
+  }
+}
+
+// ===================== FAKE LOGIN =====================
+// Demo credential: username "A", password "1"
+function doLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  if (username !== 'A' || password !== '1') {
+    alert('Invalid credentials.\nUse username A and password 1.');
+    return;
+  }
+
+  // Fake success
+  isUnlocked = true;
+  credits = 0; // After unlock starts with 0 credits
+  localStorage.setItem('loveUnlocked', 'true');
+  localStorage.setItem('loveCredits', 0);
+
+  updateUI();
+  alert('✅ Login successful!\nDecode feature unlocked forever.\nYou start with 0 credits.\nYou still get +5 credits every day.');
+}
+
+// ===================== WORD BANK =====================
+const WORD_BANK = [
+  {w:"love",s:54,v:"pos"},{w:"heart",s:52,v:"pos"},{w:"forever",s:93,v:"pos"},{w:"soulmate",s:102,v:"pos"},
+  {w:"kiss",s:59,v:"pos"},{w:"embrace",s:52,v:"pos"},{w:"darling",s:67,v:"pos"},{w:"sweetheart",s:121,v:"pos"},
+  {w:"beloved",s:63,v:"pos"},{w:"adore",s:43,v:"pos"},{w:"cherish",s:71,v:"pos"},{w:"passion",s:88,v:"pos"},
+  {w:"romance",s:73,v:"pos"},{w:"eternal",s:72,v:"pos"},{w:"devotion",s:106,v:"pos"},{w:"bliss",s:61,v:"pos"},
+  {w:"happiness",s:103,v:"pos"},{w:"together",s:98,v:"pos"},{w:"mine",s:41,v:"pos"},{w:"yours",s:93,v:"pos"},
+  {w:"true",s:64,v:"pos"},{w:"always",s:78,v:"pos"},{w:"baby",s:30,v:"pos"},{w:"honey",s:67,v:"pos"},
+  {w:"angel",s:39,v:"pos"},{w:"dear",s:28,v:"pos"},{w:"sweet",s:72,v:"pos"},{w:"beautiful",s:92,v:"pos"},
+  {w:"amazing",s:70,v:"pos"},{w:"wonderful",s:113,v:"pos"},{w:"precious",s:95,v:"pos"},{w:"special",s:73,v:"pos"},
+  {w:"perfect",s:79,v:"pos"},{w:"heaven",s:59,v:"pos"},{w:"paradise",s:72,v:"pos"},{w:"destiny",s:93,v:"pos"},
+  {w:"joy",s:50,v:"pos"},{w:"smile",s:60,v:"pos"},{w:"hug",s:36,v:"pos"},{w:"care",s:27,v:"pos"},
+  {w:"trust",s:87,v:"pos"},{w:"hope",s:44,v:"pos"},{w:"dream",s:41,v:"pos"},{w:"wish",s:59,v:"pos"},
+  {w:"promise",s:97,v:"pos"},{w:"soft",s:60,v:"pos"},{w:"gentle",s:64,v:"pos"},{w:"tender",s:66,v:"pos"},
+  {w:"warm",s:55,v:"pos"},{w:"light",s:56,v:"pos"},{w:"shine",s:55,v:"pos"},{w:"star",s:58,v:"pos"},
+  {w:"moon",s:57,v:"pos"},{w:"sun",s:54,v:"pos"},{w:"flower",s:79,v:"pos"},{w:"rose",s:57,v:"pos"},
+  {w:"bloom",s:47,v:"pos"},{w:"life",s:32,v:"pos"},{w:"alive",s:49,v:"pos"},{w:"peace",s:44,v:"pos"},
+  {w:"calm",s:29,v:"pos"},{w:"comfort",s:87,v:"pos"},{w:"home",s:41,v:"pos"},{w:"safe",s:31,v:"pos"},
+  {w:"kind",s:38,v:"pos"},{w:"good",s:41,v:"pos"},{w:"happy",s:60,v:"pos"},{w:"glad",s:24,v:"pos"},
+  {w:"brave",s:48,v:"pos"},{w:"courage",s:78,v:"pos"},{w:"strong",s:93,v:"pos"},{w:"beauty",s:78,v:"pos"},
+  {w:"grace",s:35,v:"pos"},{w:"charm",s:43,v:"pos"},{w:"magic",s:35,v:"pos"},{w:"fairy",s:51,v:"pos"},
+  {w:"kissed",s:68,v:"pos"},{w:"hugged",s:51,v:"pos"},{w:"loved",s:58,v:"pos"},{w:"adored",s:47,v:"pos"},
+
+  {w:"pain",s:40,v:"dark"},{w:"lost",s:66,v:"dark"},{w:"cry",s:46,v:"dark"},{w:"alone",s:47,v:"dark"},
+  {w:"heartbreak",s:91,v:"dark"},{w:"tears",s:63,v:"dark"},{w:"longing",s:80,v:"dark"},{w:"missing",s:87,v:"dark"},
+  {w:"farewell",s:81,v:"dark"},{w:"goodbye",s:73,v:"dark"},{w:"regret",s:75,v:"dark"},{w:"sorrow",s:106,v:"dark"},
+  {w:"ache",s:17,v:"dark"},{w:"distance",s:86,v:"dark"},{w:"silence",s:76,v:"dark"},{w:"yearning",s:100,v:"dark"},
+  {w:"empty",s:79,v:"dark"},{w:"broken",s:65,v:"dark"},{w:"sad",s:24,v:"dark"},{w:"hurt",s:67,v:"dark"},
+  {w:"lonely",s:84,v:"dark"},{w:"crush",s:67,v:"dark"},{w:"reject",s:61,v:"dark"},{w:"leave",s:45,v:"dark"},
+  {w:"gone",s:41,v:"dark"},{w:"fear",s:30,v:"dark"},{w:"scare",s:46,v:"dark"},{w:"weak",s:40,v:"dark"},
+  {w:"cruel",s:59,v:"dark"},{w:"mean",s:33,v:"dark"},{w:"bad",s:7,v:"dark"},{w:"evil",s:48,v:"dark"},
+  {w:"dark",s:34,v:"dark"},{w:"shadow",s:70,v:"dark"},{w:"ghost",s:72,v:"dark"},{w:"demon",s:51,v:"dark"},
+  {w:"devil",s:56,v:"dark"},{w:"hell",s:37,v:"dark"},{w:"death",s:38,v:"dark"},{w:"die",s:18,v:"dark"},
+  {w:"dead",s:14,v:"dark"},{w:"wilt",s:64,v:"dark"},{w:"grief",s:45,v:"dark"},{w:"mourning",s:109,v:"dark"},
+  {w:"angry",s:61,v:"dark"},{w:"mad",s:18,v:"dark"},{w:"hate",s:34,v:"dark"},{w:"bitter",s:66,v:"dark"},
+  {w:"jealous",s:71,v:"dark"},{w:"envy",s:58,v:"dark"},{w:"spite",s:69,v:"dark"},{w:"rage",s:31,v:"dark"},
+
+  {w:"you",s:61,v:"neu"},{w:"me",s:18,v:"neu"},{w:"us",s:40,v:"neu"},{w:"we",s:28,v:"neu"},
+  {w:"i",s:9,v:"neu"},{w:"my",s:38,v:"neu"},{w:"your",s:79,v:"neu"},{w:"our",s:54,v:"neu"},
+  {w:"the",s:33,v:"neu"},{w:"and",s:19,v:"neu"},{w:"for",s:39,v:"neu"},{w:"with",s:60,v:"neu"},
+  {w:"from",s:52,v:"neu"},{w:"this",s:56,v:"neu"},{w:"that",s:49,v:"neu"},{w:"what",s:52,v:"neu"},
+  {w:"when",s:51,v:"neu"},{w:"where",s:59,v:"neu"},{w:"why",s:57,v:"neu"},{w:"how",s:46,v:"neu"},
+  {w:"code",s:27,v:"neu"},{w:"number",s:74,v:"neu"},{w:"letter",s:78,v:"neu"},{w:"word",s:60,v:"neu"},
+  {w:"secret",s:70,v:"neu"},{w:"message",s:74,v:"neu"},{w:"note",s:54,v:"neu"},{w:"time",s:47,v:"neu"},
+  {w:"moment",s:80,v:"neu"},{w:"day",s:30,v:"neu"},{w:"night",s:58,v:"neu"},{w:"dream",s:41,v:"neu"},
+  {w:"soul",s:67,v:"neu"},{w:"spirit",s:91,v:"neu"},{w:"mind",s:40,v:"neu"},{w:"body",s:46,v:"neu"},
+  {w:"feel",s:28,v:"neu"},{w:"touch",s:67,v:"neu"},{w:"want",s:58,v:"neu"},{w:"need",s:28,v:"neu"},
+  {w:"miss",s:60,v:"neu"},{w:"find",s:33,v:"neu"},{w:"search",s:62,v:"neu"},{w:"path",s:45,v:"neu"},
+  {w:"way",s:49,v:"neu"},{w:"road",s:38,v:"neu"},{w:"journey",s:99,v:"neu"},{w:"story",s:97,v:"neu"}
+];
+
+const SUM_INDEX = {};
+WORD_BANK.forEach(item => {
+  if (!SUM_INDEX[item.s]) SUM_INDEX[item.s] = [];
+  SUM_INDEX[item.s].push(item);
+});
+
+let currentVibe = 'positive';
+let lastBestOption = null;
+
+// ===================== HELPERS =====================
+function letterToNumber(char) {
+  const code = char.toUpperCase().charCodeAt(0);
+  return (code >= 65 && code <= 90) ? code - 64 : null;
+}
+function numbersToLetters(nums) {
+  return nums.map(n => String.fromCharCode(64 + n));
+}
+
+function getValidSplits(digitStr) {
+  const results = [];
+  function dfs(start, path) {
+    if (start === digitStr.length) {
+      results.push([...path]);
+      return;
+    }
+    if (start + 1 <= digitStr.length) {
+      const one = parseInt(digitStr[start]);
+      if (one >= 1 && one <= 26) {
+        path.push(one);
+        dfs(start + 1, path);
+        path.pop();
+      }
+    }
+    if (start + 2 <= digitStr.length && digitStr[start] !== '0') {
+      const two = parseInt(digitStr.slice(start, start + 2));
+      if (two >= 1 && two <= 26) {
+        path.push(two);
+        dfs(start + 2, path);
+        path.pop();
+      }
+    }
+  }
+  dfs(0, []);
+  return results;
+}
+
+function generateAllDecodings(tokens) {
+  const options = [];
+  function processToken(token) {
+    if (token === '0') return [];
+    const num = parseInt(token);
+    if (!isNaN(num) && num >= 1 && num <= 26) return [[num]];
+    return getValidSplits(token);
+  }
+
+  const tokenOptions = tokens.map(processToken).filter(a => a.length > 0);
+  if (tokenOptions.length === 0) return [];
+
+  function cartesian(arrays) {
+    return arrays.reduce((a, b) => a.flatMap(d => b.map(e => d.concat(e))), [[]]);
+  }
+  const allCombs = cartesian(tokenOptions);
+
+  allCombs.forEach(seq => {
+    if (seq.length === 0) return;
+    const letters = numbersToLetters(seq);
+    const word = letters.join('');
+    const total = seq.reduce((a,b) => a+b, 0);
+    options.push({numbers: seq, letters, word, total});
+  });
+
+  const seen = new Set();
+  return options.filter(o => {
+    if (seen.has(o.word)) return false;
+    seen.add(o.word);
+    return true;
+  }).slice(0, 10);
+}
+
+function getAnagrams(str) {
+  if (str.length < 2 || str.length > 6) return [];
+  const results = new Set();
+  function permute(arr, m = []) {
+    if (arr.length === 0) {
+      results.add(m.join(''));
+      return;
+    }
+    for (let i = 0; i < arr.length; i++) {
+      const curr = arr.slice();
+      const next = curr.splice(i, 1);
+      permute(curr, m.concat(next));
+    }
+  }
+  permute(str.toUpperCase().split(''));
+  return Array.from(results);
+}
+
+function generateSwapVariations(baseNumbers) {
+  const swaps = [];
+  baseNumbers.forEach((n, i) => {
+    [-1, 1].forEach(delta => {
+      const newNum = n + delta;
+      if (newNum >= 1 && newNum <= 26) {
+        const newSeq = [...baseNumbers];
+        newSeq[i] = newNum;
+        const word = numbersToLetters(newSeq).join('');
+        const total = newSeq.reduce((a,b) => a+b, 0);
+        if (word.length >= 2) {
+          swaps.push({numbers: newSeq, word, total, changed: n + '→' + newNum});
+        }
+      }
+    });
+  });
+  const seen = new Set();
+  return swaps.filter(s => {
+    if (seen.has(s.word)) return false;
+    seen.add(s.word);
+    return true;
+  }).slice(0, 8);
+}
+
+// ===================== TABS =====================
+function switchTab(idx) {
+  document.getElementById('encode-tab').classList.toggle('active', idx === 0);
+  document.getElementById('decipher-tab').classList.toggle('active', idx === 1);
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i === idx));
+}
+
+// ===================== ENCODE =====================
+function encodeWords() {
+  const input = document.getElementById('encode-input').value.trim();
+  const resultEl = document.getElementById('encode-result');
+  const highlight = document.getElementById('highlight-first').checked;
+
+  if (!input) {
+    resultEl.innerHTML = '<span style="color:#9f1239">Write something romantic...</span>';
+    return;
+  }
+
+  const words = input.split(/\s+/);
+  let html = '';
+  let allNums = [];
+
+  words.forEach((word, idx) => {
+    let nums = [];
+    let isFirst = true;
+    for (let char of word) {
+      const n = letterToNumber(char);
+      if (n !== null) {
+        if (highlight && isFirst) {
+          nums.push('<span class="first-letter">' + n + '</span>');
+          isFirst = false;
+        } else {
+          nums.push(n);
+        }
+      }
+    }
+    if (nums.length > 0) {
+      html += nums.join(' ') + (idx < words.length - 1 ? ' &nbsp;|&nbsp; ' : '');
+      allNums.push(...nums.map(n => parseInt(String(n).replace(/<[^>]+>/g, ''))));
+    }
+  });
+
+  const total = allNums.reduce((a,b) => a+b, 0);
+  if (total > 0) html += '<br><span style="display:inline-block;background:#fce7f3;color:#9f1239;padding:2px 10px;border-radius:9999px;font-size:12px;margin-top:8px">Total: ' + total + ' 💓</span>';
+  resultEl.innerHTML = html || 'No letters found';
+}
+
+// ===================== DECIPHER =====================
+function canDecode() {
+  if (!isUnlocked) {
+    document.getElementById('login-overlay').style.display = 'flex';
+    return false;
+  }
+  if (credits < 5) {
+    alert('Not enough credits!\nYou get +5 daily on login.\nBuy more credits to continue.');
+    return false;
+  }
+  return true;
+}
+
+function decipherNumbers() {
+  if (!canDecode()) return;
+
+  const input = document.getElementById('decipher-input').value.trim();
+  const container = document.getElementById('decipher-results');
+  const interpretEl = document.getElementById('vibe-interpret');
+  const anagramList = document.getElementById('anagram-list');
+  const swapContainer = document.getElementById('swap-variations');
+  const varList = document.getElementById('variations-list');
+  const pureSection = document.getElementById('pure-total-section');
+  const pureList = document.getElementById('pure-total-list');
+
+  container.innerHTML = '';
+  interpretEl.style.display = 'none';
+  anagramList.innerHTML = '';
+  swapContainer.innerHTML = '';
+  varList.innerHTML = '';
+  pureSection.style.display = 'none';
+  pureList.innerHTML = '';
+  lastBestOption = null;
+
+  if (!input) {
+    container.innerHTML = '<div style="color:#9f1239;padding:10px">Enter a number or sequence...</div>';
+    return;
+  }
+
+  if (input.replace(/[\s,]/g,'') === '0') {
+    container.innerHTML = '<div style="color:#9f1239;padding:10px">0 alone cannot form a letter (A=1 … Z=26).</div>';
+    return;
+  }
+
+  let raw = input.toLowerCase().split(/[\s,]+/).filter(t => t && t !== 'total' && t !== 'sum');
+  const tokens = raw.filter(t => /^\d+$/.test(t));
+  if (tokens.length === 0) {
+    container.innerHTML = '<div style="color:#9f1239;padding:10px">No valid numbers found</div>';
+    return;
+  }
+
+  // Deduct credits
+  credits -= 5;
+  localStorage.setItem('loveCredits', credits);
+  updateUI();
+
+  // Digit splits
+  const options = generateAllDecodings(tokens);
+
+  if (options.length > 0) {
+    options.forEach(opt => {
+      const card = document.createElement('div');
+      card.className = 'decoding-card';
+      card.innerHTML = '<div class="word">' + opt.word + '</div>' +
+                       '<div class="detail">' + opt.numbers.join(' ') + ' &nbsp;•&nbsp; Total ' + opt.total + ' 💓</div>';
+      card.onclick = () => selectDecoding(opt);
+      container.appendChild(card);
+    });
+    setTimeout(() => selectDecoding(options[0]), 60);
+  } else {
+    container.innerHTML = '<div style="color:#9f1239;padding:10px">No valid letter splits found.</div>';
+  }
+
+  // Pure total mode
+  if (tokens.length === 1) {
+    const target = parseInt(tokens[0]);
+    if (!isNaN(target) && target > 0) {
+      pureSection.style.display = 'block';
+      showWordsForSum(target, pureList);
+    }
+  }
+}
+
+function selectDecoding(opt) {
+  lastBestOption = opt;
+
+  const interpretEl = document.getElementById('vibe-interpret');
+  const isPos = currentVibe === 'positive';
+  let text = '';
+  if (isPos) {
+    if (opt.total >= 65) text = 'Strong loving & passionate energy ❤️ Feels deeply connected.';
+    else if (opt.total >= 35) text = 'Warm and meaningful romantic message 💕';
+    else text = 'Sweet, gentle love note 🌸 Light but caring.';
+  } else {
+    if (opt.total >= 65) text = 'Intense emotions... deep longing or passionate ache 💔';
+    else if (opt.total >= 35) text = 'Emotional weight and yearning here...';
+    else text = 'Quiet missing or gentle sorrow...';
+  }
+  interpretEl.innerHTML = '<strong>' + (isPos ? '💖 Positive' : '🌑 Dark') + ' Reading:</strong> ' + text +
+                          '<br><span style="font-size:11px;opacity:0.75">' + opt.word + ' • ' + opt.numbers.join(' ') + ' • total ' + opt.total + '</span>';
+  interpretEl.style.display = 'block';
+
+  showAnagrams(opt.word);
+  showSwapVariations(opt.numbers);
+  showWordsForSum(opt.total, document.getElementById('variations-list'));
+}
+
+function showAnagrams(word) {
+  const container = document.getElementById('anagram-list');
+  container.innerHTML = '';
+  const anas = getAnagrams(word);
+  const bankWords = new Set(WORD_BANK.map(x => x.w.toUpperCase()));
+  const shown = new Set();
+
+  anas.forEach(a => {
+    if (a === word.toUpperCase() || shown.has(a)) return;
+    shown.add(a);
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.innerHTML = a + (bankWords.has(a) ? ' ★' : '');
+    chip.onclick = () => {
+      switchTab(0);
+      document.getElementById('encode-input').value = a.toLowerCase();
+      setTimeout(encodeWords, 40);
+    };
+    container.appendChild(chip);
+  });
+
+  if (shown.size === 0) {
+    container.innerHTML = '<span style="font-size:12px;color:#9f1239">No other anagrams</span>';
+  }
+}
+
+function showSwapVariations(baseNumbers) {
+  const container = document.getElementById('swap-variations');
+  container.innerHTML = '';
+  const swaps = generateSwapVariations(baseNumbers);
+  if (swaps.length === 0) {
+    container.innerHTML = '<span style="font-size:12px;color:#9f1239">No close swaps</span>';
+    return;
+  }
+  swaps.forEach(s => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.innerHTML = s.word + ' <span style="font-size:9px;opacity:0.6">(' + s.changed + ')</span>';
+    chip.onclick = () => {
+      switchTab(0);
+      document.getElementById('encode-input').value = s.word;
+      setTimeout(encodeWords, 40);
+    };
+    container.appendChild(chip);
+  });
+}
+
+function showWordsForSum(total, container) {
+  container.innerHTML = '';
+  let matches = [];
+  for (let t = total - 3; t <= total + 3; t++) {
+    if (SUM_INDEX[t]) {
+      SUM_INDEX[t].forEach(item => {
+        matches.push({...item, dist: Math.abs(t - total)});
+      });
+    }
+  }
+
+  if (currentVibe === 'positive') {
+    matches = matches.filter(m => m.v === 'pos' || m.v === 'neu');
+  } else {
+    matches = matches.filter(m => m.v === 'dark' || m.v === 'neu');
+  }
+
+  matches.sort((a,b) => a.dist - b.dist || a.w.localeCompare(b.w));
+  const seen = new Set();
+  matches = matches.filter(m => {
+    if (seen.has(m.w)) return false;
+    seen.add(m.w);
+    return true;
+  }).slice(0, 14);
+
+  if (matches.length === 0) {
+    container.innerHTML = '<span style="font-size:12px;color:#9f1239">No matching words for total ' + total + '</span>';
+    return;
+  }
+
+  matches.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.innerHTML = item.dist === 0 ? item.w + ' (' + item.s + ')' : item.w + ' (~' + item.s + ')';
+    chip.onclick = () => {
+      switchTab(0);
+      document.getElementById('encode-input').value = item.w;
+      setTimeout(encodeWords, 40);
+    };
+    container.appendChild(chip);
+  });
+}
+
+function setVibe(vibe) {
+  currentVibe = vibe;
+  document.getElementById('vibe-positive').classList.toggle('active', vibe === 'positive');
+  document.getElementById('vibe-dark').classList.toggle('active', vibe === 'dark');
+  if (lastBestOption) {
+    showWordsForSum(lastBestOption.total, document.getElementById('variations-list'));
+    selectDecoding(lastBestOption);
+  }
+}
+
+// ===================== BUY CREDITS =====================
+function showBuyOptions() {
+  const choice = prompt('Buy Credit Packs:\n\n20 Credits → ₹30\n50 Credits → ₹70\n100 Credits → ₹120\n\nEnter 20, 50 or 100:');
+  if (choice === '20') credits += 20;
+  else if (choice === '50') credits += 50;
+  else if (choice === '100') credits += 100;
+  else return;
+  localStorage.setItem('loveCredits', credits);
+  updateUI();
+  alert('✅ Credits added! Current balance: ' + credits);
+}
+
+// ===================== SHARE =====================
+async function shareResult(tab) {
+  let text = '💕 Love Letters\n';
+  if (tab === 'encode') {
+    const res = document.getElementById('encode-result').innerText.trim();
+    if (!res || res.includes('Your romantic')) {
+      alert('Convert something first!');
+      return;
+    }
+    text += 'Encoded:\n' + res;
+  } else {
+    if (!lastBestOption) {
+      alert('Decode something first!');
+      return;
+    }
+    text += 'Deciphered: ' + lastBestOption.word + '\nNumbers: ' + lastBestOption.numbers.join(' ') + '\nTotal: ' + lastBestOption.total;
+  }
+  text += '\n\nMade with Love Letters';
+
+  if (navigator.share) {
+    try {
+      await navigator.share({title: '💕 Love Letters', text});
+      return;
+    } catch(e) {}
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('Copied to clipboard!');
+  } catch(e) {
+    alert(text);
+  }
+}
+
+// ===================== INIT =====================
+window.onload = function() {
+  updateUI();
+  document.getElementById('encode-input').value = 'you are my forever';
+  setTimeout(encodeWords, 200);
+
+  document.getElementById('encode-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      encodeWords();
+    }
+  });
+  document.getElementById('decipher-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      decipherNumbers();
+    }
+  });
+};
+</script>
+</body>
 </html>
