@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-proapp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-proapp_password}
+      POSTGRES_DB: ${POSTGRES_DB:-proapp}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # DB is only reachable inside the compose network (no host port published).
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    depends_on:
+      - db
+    volumes:
+      # Mount your Firebase service-account JSON read-only (optional).
+      - ./secrets:/app/secrets:ro
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+
+volumes:
+  pgdata:

@@ -1,0 +1,23 @@
+# Dependencies & build outputs
+node_modules/
+frontend/dist/
+frontend/.env
+
+# Secrets — never commit
+.env
+backend/.env
+secrets/
+certbot/
+
+# Android build artifacts (the android/ project itself IS committed)
+frontend/android/.gradle/
+frontend/android/build/
+frontend/android/app/build/
+frontend/android/capacitor-cordova-android-plugins/build/
+frontend/android/local.properties
+*.keystore
+*.jks
+
+# Misc
+*.log
+.DS_Store
