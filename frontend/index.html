@@ -159,6 +159,12 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--primary)}
 .decode-card .w{font-size:20px;font-weight:800;color:var(--primary-2);letter-spacing:.02em}
 .decode-card .d{font-size:12px;color:var(--muted);font-weight:700;margin-top:3px}
 .vibe-box{font-size:14px;background:var(--surface-2);border:1.5px dashed var(--border);border-radius:14px;padding:12px;margin:12px 0;line-height:1.45}
+.sentence-card{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.sentence-card:active{transform:scale(.98)}
+.sentence-card.gem{border-color:var(--primary);background:var(--primary-soft)}
+.sentence-card .txt{font-weight:800;font-size:16px;color:var(--primary-2);text-transform:capitalize}
+.sentence-card .meta{font-size:11px;color:var(--muted);font-weight:800;font-family:ui-monospace,monospace;white-space:nowrap;flex:none}
+.sentence-card .gemtag{font-size:9px;font-weight:800;background:var(--primary);color:#fff;padding:2px 6px;border-radius:999px;margin-left:6px;vertical-align:middle}
 .seg{display:flex;gap:8px;margin:10px 0}
 .seg button{flex:1;padding:9px;border-radius:999px;font-weight:800;font-size:13px;border:2px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer}
 .seg button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
@@ -324,6 +330,10 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--primary)}
           <button class="btn btn-soft" onclick="copyDecode()">Copy</button>
           <button class="btn btn-ghost" onclick="shareResult('decode')">Share</button>
         </div>
+      </div>
+      <div class="card">
+        <div class="section-title">💬 Sentence ideas <span class="sub" style="color:var(--muted)">tap to copy</span></div>
+        <div id="sentence-list"></div>
       </div>
       <div class="card">
         <div class="section-title">Letter anagrams</div>
@@ -642,6 +652,94 @@ function generateSwapVariations(base){
 }
 
 // ======================================================================
+//  SENTENCES  (decode a number into acrostic sentences from initials)
+// ======================================================================
+// Known initialisms -> phrases (matched against the decoded initials).
+const PHRASES = {
+  ily:["I Love You"], ilu:["I Love You"], ly:["Love You"], lu:["Love You"],
+  ilyt:["I Love You Too"], ilsm:["I Love You So Much"], ilysm:["I Love You So Much"],
+  imy:["I Miss You"], my:["Miss You"], mu:["Miss You"], iny:["I Need You"], iwy:["I Want You"],
+  tou:["Thinking Of You"], toy:["Thinking Of You"], cmt:["Call Me Tonight"],
+  ty:["Thank You"], tys:["Thank You So"], tysm:["Thank You So Much"], yw:["You're Welcome"],
+  gm:["Good Morning"], gn:["Good Night"], gnite:["Good Night"], hbd:["Happy Birthday"],
+  hru:["How Are You"], hau:["How Are You"], wby:["What About You"], hbu:["How About You"],
+  wyd:["What You Doing"], wym:["What You Mean"], omw:["On My Way"], brb:["Be Right Back"],
+  ttyl:["Talk To You Later"], ttys:["Talk To You Soon"], gtg:["Got To Go"], cu:["See You"],
+  cus:["See You Soon"], cul:["See You Later"], hmu:["Hit Me Up"], lmk:["Let Me Know"],
+  idk:["I Don't Know"], idc:["I Don't Care"], ikr:["I Know Right"], omg:["Oh My God"],
+  bff:["Best Friends Forever"], bae:["Before Anyone Else"], xoxo:["Hugs And Kisses"],
+  yolo:["You Only Live Once"], fyi:["For Your Information"], asap:["As Soon As Possible"],
+  np:["No Problem"], nvm:["Never Mind"], jk:["Just Kidding"], myl:["Miss You Lots"],
+   maf:["Mine And Forever"], ub:["You're Beautiful"], mia:["Missing In Action"],
+  ilf:["I Love Forever"], uma:["You Mean Alot"], hi:["Hey"], hey:["Hello"],
+  be:["Be Everything"], me:["Marry Everyone"]
+};
+// Per-letter acrostic word choices (index 0 = the nicest default -> "I love you").
+const ACRO = {
+  a:["always","adore","and","affection","all"], b:["be","baby","beautiful","best","beloved"],
+  c:["can","come","cutie","cherish","close"], d:["do","darling","dear","deeply","dream"],
+  e:["ever","every","embrace","endless","eyes"], f:["forever","for","feel","fondly","fully"],
+  g:["give","gorgeous","gently","good","gaze"], h:["hold","hug","honey","heart","happily"],
+  i:["I","i'll","i'm","in","is"], j:["just","joyfully","joy"], k:["kiss","keep","kind"],
+  l:["love","longing","lovely","like","loyally"], m:["my","miss","madly","more","me"],
+  n:["never","now","near","need","nicely"], o:["only","our","oh","own","ours"],
+  p:["please","precious","promise","perfectly"], q:["quietly","quite"],
+  r:["really","romance","remember","right"], s:["so","sweet","still","stay","smile"],
+  t:["truly","to","together","treasure","thinking"], u:["us","until","under","understand"],
+  v:["very","value","vividly"], w:["want","with","warmly","wish","we"],
+  x:["xoxo","kiss"], y:["you","yours","yes","yearn","young"], z:["zealously","zest"]
+};
+
+// All letter decodings of the tokens (capped), returned as arrays of numbers.
+function allSequences(tokens, cap){
+  function proc(t){ if(t==='0')return[]; const n=parseInt(t); if(!isNaN(n)&&n>=1&&n<=26)return[[n]]; return getValidSplits(t); }
+  const to=tokens.map(proc).filter(a=>a.length>0);
+  if(!to.length)return[];
+  let combs=[[]];
+  for(const opts of to){
+    const next=[];
+    for(const c of combs){ for(const o of opts){ next.push(c.concat(o)); if(next.length>=cap)break; } if(next.length>=cap)break; }
+    combs=next.slice(0,cap);
+  }
+  return combs;
+}
+function lettersOf(seq){ return seq.map(n=>String.fromCharCode(64+n)); }
+function acrosticSentence(letters, variant){
+  const w=letters.map(ch=>{ const a=ACRO[ch.toLowerCase()]||[ch]; return a[Math.min(variant,a.length-1)]||a[0]; });
+  const s=w.join(' ');
+  return s.charAt(0).toUpperCase()+s.slice(1);
+}
+function showSentences(tokens){
+  const box=document.getElementById('sentence-list'); box.innerHTML='';
+  const seqs=allSequences(tokens,500);
+  const multi=seqs.filter(s=>s.length>=2);
+  if(!multi.length){
+    box.innerHTML='<div class="empty-state"><div class="em">✍️</div><p>No sentences can be formed.</p></div>';
+    return;
+  }
+  const items=[]; const seenText=new Set();
+  const push=(text,meta,gem)=>{ const k=text.toLowerCase(); if(seenText.has(k))return; seenText.add(k); items.push({text,meta,gem}); };
+  // 1) meaningful phrase matches across every decoding
+  seqs.forEach(seq=>{
+    const initials=lettersOf(seq).join('');
+    const hit=PHRASES[initials.toLowerCase()];
+    if(hit) hit.forEach(ph=>push(ph, initials+' · '+seq.join('·'), true));
+  });
+  // 2) playful acrostics from the shortest distinct decodings
+  const distinct=[]; const ds=new Set();
+  multi.slice().sort((a,b)=>a.length-b.length).forEach(seq=>{ const k=seq.join(','); if(!ds.has(k)){ds.add(k);distinct.push(seq);} });
+  const short=distinct.slice(0,3);
+  short.forEach(seq=>{ const letters=lettersOf(seq); push(acrosticSentence(letters,0), letters.join('')+' · '+seq.join('·'), false); });
+  if(short[0]){ const letters=lettersOf(short[0]); push(acrosticSentence(letters,1), letters.join('')+' · '+short[0].join('·'), false); }
+  items.slice(0,8).forEach(it=>{
+    const c=document.createElement('div'); c.className='sentence-card'+(it.gem?' gem':'');
+    c.innerHTML='<span class="txt">'+escapeHtml(it.text)+(it.gem?'<span class="gemtag">MEANING</span>':'')+'</span><span class="meta">'+escapeHtml(it.meta)+'</span>';
+    c.onclick=()=>copyText('💌 '+it.text);
+    box.appendChild(c);
+  });
+}
+
+// ======================================================================
 //  TABS
 // ======================================================================
 function switchTab(i){
@@ -695,6 +793,7 @@ function decodeNumbers(){
   document.getElementById('anagram-list').innerHTML='';
   document.getElementById('swap-list').innerHTML='';
   document.getElementById('variations-list').innerHTML='';
+  document.getElementById('sentence-list').innerHTML='';
   pureSec.style.display='none'; pureList.innerHTML=''; lastBestOption=null;
 
   if(!input){ toast('Enter a number first'); return; }
@@ -719,6 +818,8 @@ function decodeNumbers(){
   } else {
     cont.innerHTML='<div class="empty-state"><div class="em">💔</div><p>No valid letter splits found</p></div>';
   }
+
+  showSentences(tokens);
 
   if(tokens.length===1){ const target=parseInt(tokens[0]); if(target>0){ pureSec.style.display='block'; showWordsForSum(target,pureList); } }
 }
