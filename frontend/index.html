@@ -722,6 +722,36 @@ function addPhrase(entry){ const k=entry[0].toLowerCase(); (PHRASES[k]=PHRASES[k
   ["fam","Family"],["bro","Brother"],["sis","Sister"],["twins","Twins"],["hi","Hi"],["hey","Hello"],
   ["mrb","Meri Best"],["mj","Meri Jaan"],["mjb","Meri Jaan Baby"]
 ].forEach(addPhrase);
+// ---- batch 2: chat classics, gaming, internet culture, more love ----
+[
+  ["afk","Away From Keyboard"],["bbiab","Be Back In A Bit"],["bbiam","Be Back In A Minute"],["brt","Be Right There"],
+  ["cyl","See You Later"],["cys","See You Soon"],["ttyt","Talk To You Tomorrow"],["cwyl","Chat With You Later"],
+  ["rq","Real Quick"],["wrud","What Are You Doing"],["wdyt","What Do You Think"],["wdys","What Did You Say"],
+  ["sry","Sorry"],["pls","Please"],["plz","Please"],["thx","Thanks"],["thnx","Thanks"],["tq","Thank You"],["ta","Thanks"],
+  ["yr","Yeah Right"],["kk","Okay Okay"],["jkjk","Just Kidding Just Kidding"],["lyk","Let You Know"],
+  ["ntb","Not Too Bad"],["nm","Not Much"],["nmu","Not Much You"],["sok","It's Okay"],["omt","One More Thing"],
+  ["ftfy","Fixed That For You"],["dae","Does Anyone Else"],["iirc","If I Recall Correctly"],["afaic","As Far As I'm Concerned"],
+  ["ggwp","Good Game Well Played"],["glhf","Good Luck Have Fun"],["pm","Private Message"],["pfp","Profile Picture"],
+  ["gc","Group Chat"],["fyp","For You Page"],["ootd","Outfit Of The Day"],["grwm","Get Ready With Me"],["ib","Inspired By"],
+  ["tbt","Throwback Thursday"],["fbf","Flashback Friday"],["ff","Follow Friday"],["dc","Disconnected"],["pog","Play Of the Game"],
+  ["ez","Easy"],["npc","Non Player Character"],["wip","Work In Progress"],["oan","On Another Note"],["eod","End Of Day"],
+  ["eom","End Of Message"],["tba","To Be Announced"],["tbc","To Be Continued"],["tbd","To Be Decided"],["vip","Very Important Person"],
+  ["ceo","Chief Executive Officer"],["faq","Frequently Asked Questions"],["rsvp","Please Reply"],["oot","Out Of Town"],
+  ["oto","One Time Only"],["ttm","Talk To Me"],["gtsy","Good To See You"],["lms","Like My Status"],["rt","Retweet"],
+  ["ppl","People"],["msg","Message"],["txt","Text"],["cuz","Because"],["bcz","Because"],["bc","Because"],["abt","About"],
+  ["rly","Really"],["probs","Probably"],["prob","Probably"],["atm","At The Moment"],["idts","I Don't Think So"],
+  ["ynk","You Never Know"],["ynwa","You'll Never Walk Alone"],["wdik","What Do I Know"],["ntm","Not Too Much"],
+  // more love / flirty
+  ["ilym","I Love You More"],["imyt","I Miss You Too"],["lyt","Love You Too"],["lya","Love You Always"],["lyf","Love You Forever"],
+  ["ilya","I Love You Always"],["ikwim","If You Know What I Mean"],["lylas","Love You Like A Sister"],["lylab","Love You Like A Brother"],
+  ["bffae","Best Friends Forever And Ever"],["gnsd","Good Night Sweet Dreams"],["swak","Sealed With A Kiss"],
+  ["swalk","Sealed With A Loving Kiss"],["hak","Hugs And Kisses"],["kotl","Kiss On The Lips"],["tlc","Tender Loving Care"],
+  ["fbo","Facebook Official"],["dtr","Define The Relationship"],["ldr","Long Distance Relationship"],["so","Significant Other"],
+  ["bh","Better Half"],["pda","Public Display Of Affection"],["ur","You're"],["ura","You Are Amazing"],["uatb","You Are The Best"],
+  ["mvp","Most Valuable Person"],["qt","Cutie"],["sm","So Much"],["fwb","Friends With Benefits"],
+  // feelings / reactions (sanitized)
+  ["fml","Forget My Life"],["smdh","Shaking My Darn Head"],["yay","Yay"],["nvmd","Never Mind"]
+].forEach(addPhrase);
 // Per-letter acrostic word choices (index 0 = the nicest default -> "I love you").
 const ACRO = {
   a:["always","adore","and","affection","all"], b:["be","baby","beautiful","best","beloved"],
