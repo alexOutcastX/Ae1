@@ -655,25 +655,52 @@ function generateSwapVariations(base){
 //  SENTENCES  (decode a number into acrostic sentences from initials)
 // ======================================================================
 // Known initialisms -> phrases (matched against the decoded initials).
-const PHRASES = {
-  ily:["I Love You"], ilu:["I Love You"], ly:["Love You"], lu:["Love You"],
-  ilyt:["I Love You Too"], ilsm:["I Love You So Much"], ilysm:["I Love You So Much"],
-  imy:["I Miss You"], my:["Miss You"], mu:["Miss You"], iny:["I Need You"], iwy:["I Want You"],
-  tou:["Thinking Of You"], toy:["Thinking Of You"], cmt:["Call Me Tonight"],
-  ty:["Thank You"], tys:["Thank You So"], tysm:["Thank You So Much"], yw:["You're Welcome"],
-  gm:["Good Morning"], gn:["Good Night"], gnite:["Good Night"], hbd:["Happy Birthday"],
-  hru:["How Are You"], hau:["How Are You"], wby:["What About You"], hbu:["How About You"],
-  wyd:["What You Doing"], wym:["What You Mean"], omw:["On My Way"], brb:["Be Right Back"],
-  ttyl:["Talk To You Later"], ttys:["Talk To You Soon"], gtg:["Got To Go"], cu:["See You"],
-  cus:["See You Soon"], cul:["See You Later"], hmu:["Hit Me Up"], lmk:["Let Me Know"],
-  idk:["I Don't Know"], idc:["I Don't Care"], ikr:["I Know Right"], omg:["Oh My God"],
-  bff:["Best Friends Forever"], bae:["Before Anyone Else"], xoxo:["Hugs And Kisses"],
-  yolo:["You Only Live Once"], fyi:["For Your Information"], asap:["As Soon As Possible"],
-  np:["No Problem"], nvm:["Never Mind"], jk:["Just Kidding"], myl:["Miss You Lots"],
-   maf:["Mine And Forever"], ub:["You're Beautiful"], mia:["Missing In Action"],
-  ilf:["I Love Forever"], uma:["You Mean Alot"], hi:["Hey"], hey:["Hello"],
-  be:["Be Everything"], me:["Marry Everyone"]
-};
+const PHRASES = {};
+function addPhrase(entry){ const k=entry[0].toLowerCase(); (PHRASES[k]=PHRASES[k]||[]).push.apply(PHRASES[k], entry.slice(1)); }
+[
+  // ---- love / flirty / simp ----
+  ["ily","I Love You"],["ilu","I Love You"],["ilyt","I Love You Too"],["ilyf","I Love You Forever"],
+  ["ilysm","I Love You So Much"],["ly","Love You"],["lu","Love You"],["lysm","Love You So Much"],
+  ["imy","I Miss You"],["imu","I Miss You"],["my","Miss You"],["mu","Miss You"],["myl","Miss You Lots"],
+  ["iny","I Need You"],["iwy","I Want You"],["iay","I Adore You"],["ihy","I Heart You"],["icy","I Choose You"],
+  ["ual","You Are Loved"],["uab","You Are Beautiful"],["ub","You're Beautiful"],["urg","You're Gorgeous"],
+  ["umte","You Mean The World"],["ymtw","You Mean The World"],["wywh","Wish You Were Here"],
+  ["mcm","Man Crush Monday"],["wcw","Woman Crush Wednesday"],["otp","One True Pairing"],["bae","Before Anyone Else"],
+  ["mwah","Kiss"],["xo","Hugs Kisses"],["xoxo","Hugs And Kisses"],["cmt","Call Me Tonight"],["cmb","Call Me Back"],
+  ["cml","Call Me Later"],["tmb","Text Me Back"],["tou","Thinking Of You"],["toy","Thinking Of You"],
+  ["oml","Oh My Love"],["hby","Happy Birthday You"],["dwu","Down With You"],["fwm","Following With Me"],
+  ["hmy","Hold Me Yes"],["mtb","Meant To Be"],["urmw","You're My World"],["ymw","You're My World"],
+  // ---- texting basics ----
+  ["brb","Be Right Back"],["bbl","Be Back Later"],["bbs","Be Back Soon"],["gtg","Got To Go"],["ttyl","Talk To You Later"],
+  ["ttys","Talk To You Soon"],["ttfn","Ta Ta For Now"],["omw","On My Way"],["otw","On The Way"],["wyd","What You Doing"],
+  ["wud","What You Doing"],["hyd","How You Doing"],["hru","How Are You"],["hau","How Are You"],["wya","Where You At"],
+  ["wru","Where Are You"],["wbu","What About You"],["hbu","How About You"],["wby","What About You"],["wym","What You Mean"],
+  ["wdym","What Do You Mean"],["lmk","Let Me Know"],["hmu","Hit Me Up"],["dm","Direct Message"],["idk","I Don't Know"],
+  ["idc","I Don't Care"],["idm","I Don't Mind"],["ikr","I Know Right"],["imo","In My Opinion"],["imho","In My Humble Opinion"],
+  ["rn","Right Now"],["nvm","Never Mind"],["np","No Problem"],["nbd","No Big Deal"],["mb","My Bad"],["jk","Just Kidding"],
+  ["btw","By The Way"],["fyi","For Your Information"],["aka","Also Known As"],["diy","Do It Yourself"],["eta","Estimated Time Of Arrival"],
+  ["ftw","For The Win"],["gg","Good Game"],["wp","Well Played"],["gl","Good Luck"],["gj","Good Job"],["wd","Well Done"],
+  ["gn","Good Night"],["gm","Good Morning"],["ge","Good Evening"],["hagd","Have A Good Day"],["hand","Have A Nice Day"],
+  ["hags","Have A Great Summer"],["ty","Thank You"],["tys","Thank You So"],["tysm","Thank You So Much"],["tyvm","Thank You Very Much"],
+  ["yw","You're Welcome"],["wlc","Welcome"],["cu","See You"],["cya","See Ya"],["cus","See You Soon"],["cul","See You Later"],
+  ["syl","See You Later"],["sys","See You Soon"],["hbd","Happy Birthday"],["hny","Happy New Year"],["rip","Rest In Peace"],
+  ["asap","As Soon As Possible"],["jsyk","Just So You Know"],["jw","Just Wondering"],["fwiw","For What It's Worth"],["tldr","Too Long Didn't Read"],
+  // ---- gen z / brainrot ----
+  ["smh","Shaking My Head"],["lol","Laughing Out Loud"],["lmao","Laughing My Ahh Off"],["rofl","Rolling On Floor Laughing"],
+  ["iykyk","If You Know You Know"],["yktv","You Know The Vibe"],["yk","You Know"],["fr","For Real"],["frfr","For Real For Real"],
+  ["ong","On God"],["istg","I Swear To God"],["stg","Swear To God"],["ncap","No Cap"],["nc","No Cap"],["wsg","What's Good"],
+  ["wsp","What's Up"],["wus","What's Up"],["sup","What's Up"],["ykwim","You Know What I Mean"],["bffr","Be For Real"],
+  ["obv","Obviously"],["obvi","Obviously"],["def","Definitely"],["fomo","Fear Of Missing Out"],["yolo","You Only Live Once"],
+  ["goat","Greatest Of All Time"],["tmi","Too Much Information"],["til","Today I Learned"],["afaik","As Far As I Know"],
+  ["irl","In Real Life"],["op","Over Powered"],["pov","Point Of View"],["ffs","For Freak's Sake"],["wth","What The Heck"],
+  ["wtf","What The Freak"],["omfg","Oh My Freaking God"],["omds","Oh My Days"],["omg","Oh My God"],["oomf","One Of My Followers"],
+  ["gng","Gang"],["icl","I Can't Lie"],["ngl","Not Gonna Lie"],["tbh","To Be Honest"],["tbf","To Be Fair"],["idgi","I Don't Get It"],
+  ["ig","I Guess"],["tfw","That Feeling When"],["mfw","My Face When"],["dw","Don't Worry"],["hyb","How You Been"],["wbk","We Been Knew"],
+  // ---- besties / desi nibba-nibbi ----
+  ["bff","Best Friends Forever"],["bffl","Best Friends For Life"],["bf","Boyfriend"],["gf","Girlfriend"],
+  ["fam","Family"],["bro","Brother"],["sis","Sister"],["twins","Twins"],["hi","Hi"],["hey","Hello"],
+  ["mrb","Meri Best"],["mj","Meri Jaan"],["mjb","Meri Jaan Baby"]
+].forEach(addPhrase);
 // Per-letter acrostic word choices (index 0 = the nicest default -> "I love you").
 const ACRO = {
   a:["always","adore","and","affection","all"], b:["be","baby","beautiful","best","beloved"],
