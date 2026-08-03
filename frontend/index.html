@@ -140,11 +140,17 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--primary)}
 .section-title{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
 .chips{display:flex;flex-wrap:wrap;gap:7px}
 .chip{
-  background:var(--surface-2);border:1.5px solid var(--border);padding:6px 11px;border-radius:999px;
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface-2);border:1.5px solid var(--border);padding:5px 8px 5px 11px;border-radius:999px;
   font-size:13px;font-weight:700;color:var(--text);cursor:pointer;transition:.15s;
 }
 .chip:active{transform:scale(.95)}
 .chip .sub{font-size:10px;color:var(--muted);font-weight:700}
+.sumbadge{font-size:10px;font-weight:800;line-height:1;padding:3px 7px;border-radius:999px;white-space:nowrap}
+.sumbadge.exact{background:var(--primary);color:#fff}
+.sumbadge.near{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
+.match-legend{display:flex;gap:12px;align-items:center;font-size:11px;font-weight:700;color:var(--muted);margin:2px 0 8px}
+.match-legend .sumbadge{cursor:default}
 
 .decode-card{
   background:var(--surface);border:2px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:.15s;
@@ -329,6 +335,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--primary)}
           <button id="vibe-positive" class="active" onclick="setVibe('positive')">💖 Positive</button>
           <button id="vibe-dark" onclick="setVibe('dark')">🌙 Dark</button>
         </div>
+        <div class="match-legend"><span><span class="sumbadge exact">##</span> exact match</span><span><span class="sumbadge near">±</span> near (±3)</span></div>
         <div id="variations-list" class="chips"></div>
         <div id="pure-total-section" style="display:none">
           <div class="section-title">Words whose total equals your number</div>
@@ -757,7 +764,16 @@ function showWordsForSum(total,box){
   m.sort((a,b)=>a.dist-b.dist||a.w.localeCompare(b.w));
   const seen=new Set(); m=m.filter(x=>seen.has(x.w)?false:(seen.add(x.w),true)).slice(0,18);
   if(!m.length){ box.innerHTML='<span style="font-size:13px;color:var(--muted);font-weight:700">No matching words for total '+total+'</span>'; return; }
-  m.forEach(it=>{ const disp=it.w.replace(/\d+$/,''); box.appendChild(chip(disp,(it.dist===0?it.s:'~'+it.s),()=>reuseInEncode(disp))); });
+  m.forEach(it=>{
+    const disp=it.w.replace(/\d+$/,'');
+    const exact=it.dist===0;
+    const delta=it.s-total;
+    const badge='<span class="sumbadge '+(exact?'exact':'near')+'">'+it.s+(exact?'':' '+(delta>0?'+':'−')+Math.abs(delta))+'</span>';
+    const c=document.createElement('div'); c.className='chip';
+    c.innerHTML='<span>'+disp+'</span>'+badge;
+    c.onclick=()=>reuseInEncode(disp);
+    box.appendChild(c);
+  });
 }
 function setVibe(v){
   currentVibe=v;
