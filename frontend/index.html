@@ -92,9 +92,9 @@ body{
   border-radius:999px;padding:4px;margin:12px 0 16px;box-shadow:var(--shadow);
 }
 .tab{
-  flex:1;padding:10px 6px;text-align:center;border-radius:999px;
-  font-weight:800;font-size:14px;color:var(--muted);cursor:pointer;
-  transition:.2s; display:flex;align-items:center;justify-content:center;gap:5px;
+  flex:1;padding:9px 3px;text-align:center;border-radius:999px;
+  font-weight:800;font-size:12.5px;color:var(--muted);cursor:pointer;
+  transition:.2s; display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;
 }
 .tab.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:0 6px 16px -4px rgba(219,39,119,.55)}
 
@@ -193,6 +193,16 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--primary)}
 .hist-item .t1{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hist-item .t2{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,monospace}
 
+/* ---------- Cheat sheet ---------- */
+.search{width:100%;padding:12px 14px;background:var(--surface-2);border:2px solid var(--border);border-radius:14px;font-size:15px;color:var(--text);font-family:inherit}
+.search:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 20%, transparent)}
+.cheat-item{display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:10px 13px;margin-bottom:7px;cursor:pointer;transition:.12s}
+.cheat-item:active{transform:scale(.99);background:var(--primary-soft)}
+.cheat-item .ac{font-weight:800;font-size:15px;color:var(--primary-2);min-width:58px;font-family:ui-monospace,monospace}
+.cheat-item .cbody{flex:1;min-width:0}
+.cheat-item .ph{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cheat-item .code{font-size:11px;color:var(--muted);font-weight:700;font-family:ui-monospace,monospace}
+
 /* ---------- Sheets / modal ---------- */
 .scrim{position:fixed;inset:0;background:rgba(30,10,25,.5);opacity:0;pointer-events:none;transition:.25s;z-index:50}
 .scrim.show{opacity:1;pointer-events:auto}
@@ -285,6 +295,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--primary)}
     <div class="tab active" data-i="0" onclick="switchTab(0)">💌 Encode</div>
     <div class="tab" data-i="1" onclick="switchTab(1)">🔍 Decode</div>
     <div class="tab" data-i="2" onclick="switchTab(2)">🕘 History</div>
+    <div class="tab" data-i="3" onclick="switchTab(3)">📖 Cheat</div>
   </div>
 
   <!-- ENCODE -->
@@ -362,6 +373,16 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--primary)}
         <button class="link-btn" style="font-size:13px" onclick="clearHistory()">Clear all</button>
       </div>
       <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- CHEAT SHEET -->
+  <div id="v-cheat" class="view">
+    <div class="card">
+      <div class="label">📖 Acronym cheat sheet <span id="cheat-count" class="sub" style="color:var(--muted)"></span></div>
+      <input id="cheat-search" class="search" placeholder="Search acronym or phrase… (ily, goat, miss)" autocapitalize="none" autocorrect="off">
+      <div class="sub" style="color:var(--muted);margin:2px 0 10px">Tap any row to copy the phrase 💌</div>
+      <div id="cheat-list"></div>
     </div>
   </div>
 </div>
@@ -770,10 +791,36 @@ function showSentences(tokens){
 //  TABS
 // ======================================================================
 function switchTab(i){
-  ['encode','decode','history'].forEach((v,idx)=>document.getElementById('v-'+v).classList.toggle('active',idx===i));
+  ['encode','decode','history','cheat'].forEach((v,idx)=>document.getElementById('v-'+v).classList.toggle('active',idx===i));
   document.querySelectorAll('.tab').forEach((t,idx)=>t.classList.toggle('active',idx===i));
   if(i===2)renderHistory();
+  if(i===3)renderCheat(document.getElementById('cheat-search').value);
   haptic(6);
+}
+
+// ======================================================================
+//  CHEAT SHEET  (browse/search every acronym)
+// ======================================================================
+let CHEAT=[];
+function buildCheat(){
+  CHEAT=Object.keys(PHRASES).map(k=>{
+    const nums=k.toUpperCase().split('').map(c=>c.charCodeAt(0)-64);
+    return {ac:k.toUpperCase(), phrase:[...new Set(PHRASES[k])].join(' / '), code:nums.join('·'), spaced:nums.join(' ')};
+  }).sort((a,b)=>a.ac.localeCompare(b.ac));
+}
+function renderCheat(q){
+  const box=document.getElementById('cheat-list');
+  const term=(q||'').trim().toLowerCase();
+  const list=CHEAT.filter(e=> !term || e.ac.toLowerCase().includes(term) || e.phrase.toLowerCase().includes(term));
+  document.getElementById('cheat-count').textContent=list.length+' acronyms';
+  if(!list.length){ box.innerHTML='<div class="empty-state"><div class="em">🔎</div><p>No matches for “'+escapeHtml(term)+'”</p></div>'; return; }
+  box.innerHTML='';
+  list.forEach(e=>{
+    const row=document.createElement('div'); row.className='cheat-item';
+    row.innerHTML='<div class="ac">'+e.ac+'</div><div class="cbody"><div class="ph">'+escapeHtml(e.phrase)+'</div><div class="code">'+e.code+'</div></div>';
+    row.onclick=()=>copyText('💌 '+e.phrase.split(' / ')[0]);
+    box.appendChild(row);
+  });
 }
 
 // ======================================================================
@@ -944,6 +991,8 @@ window.addEventListener('DOMContentLoaded',()=>{
   applyTheme();
   document.getElementById('tg-haptics').classList.toggle('on',haptics);
   updateUI(); renderHistory();
+  buildCheat();
+  document.getElementById('cheat-search').addEventListener('input',e=>renderCheat(e.target.value));
 
   const enc=document.getElementById('encode-input');
   enc.value='you are my forever';
